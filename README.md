@@ -1,13 +1,15 @@
-###**wagnerlab_data_processing**
+**wagnerlab_data_processing**
 
 This project consists of python scripts written for data processing and analysis for the wagner lab at GWU.
 ___
-###Table of Contents:
+Table of Contents:
 - [1. Requirements](#1-requirements)
 - [2. Installation](#2-installation)
 - [3. Battery Data Processing](#3-battery-data-processing)
   - [3.1. Classes](#31-classes)
   - [3.2. Functions](#32-functions)
+    - [3.2.1 Code Example](#321-code-example)
+    - [3.2.2 Plot Examples](#322-plot-examples)
 ___
 #### 1. Requirements
 Python installation = 3.8 or later
@@ -44,13 +46,14 @@ Each instance of the class generates the following variables:
    arbin.battery_dict
    ```
 ##### 3.2. Functions
-* **load_masses**(masses, cells): calculates capacities in mAh/g, coulombic efficiency, and dQ/dV for specified cells.
+* **load_masses**(masses, cells): calculates capacities in mAh/g, coulombic efficiency, and dQ/dV for specified cells. **This function must be run before plots can be generated**.
   * masses is a list loading masses for the cells you want to process.
   * cells is a list of cells you want to process. Default is 'all'.
 * **plot_voltage_profile**(cells, cycles, axis_range, legend_loc): plots the discharge-charge potential curves for the specified cells.
   * cells is a list of cells you want to process. Default is all.
   * cycles is a list of the cycles to plot. Default is 'all'.
   * axis range as a list [x1, x2, y1, y2]
+  * legend_loc: location of the legend. Default is 0. To see full list look up "matplotlib legend_loc"
 * **plot_cycle_life**(cells, plot_type, y1_range, y2_range, decimals): plots cycle life or coulombic efficiency or both for specified cells.
   * cells is a list of cells you want to process. Default is all.
   * plot type: 'capacity', 'coulombic', or 'both'. Default is both. 
@@ -58,6 +61,23 @@ Each instance of the class generates the following variables:
   * y1_range: left-hand axis
   * y2_range: right hand axis
   * decimals: number of decimal places axis labels are printed out to.
-* **plot_dqdv**()
-* **igor_datafile**()
+* **plot_dqdv**(cells, cycles, axis_range, legend_loc): plots dQ/dV vs voltage curves for specified cells and cycles. **For neware only at the moment**.
+  * cells is a list of cells you want to process. Default is all.
+  * cycles is a list of the cycles to plot. Default is 'all'.
+  * axis range as a list [x1, x2, y1, y2]
+  * legend_loc: location of the legend. Default is 0. To see full list look up "matplotlib legend_loc"
+* **igor_datafile**(): coming
+  
+###### 3.2.1 Code Example
+Use a function on a class instance as follows:
+```Python
+arbin.load_masses('arguments')
+```
+###### 3.2.2 Plot Examples
+* Charge-Discharge Profiles:
+![image](plot_voltage_profiles_example.png)
+* Cycling Lifetime:
+![image](../plot_cycle_life_example.png)
+* dQ/dV:
+![image](../plot_dqdv_example.png)
 

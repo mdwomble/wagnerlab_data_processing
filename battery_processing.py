@@ -478,4 +478,85 @@ class neware_file():
             ax1.axis(y1_range)
 
             plt.show() 
+            
+    def plot_dqdv(self, cells='all', cycles='all', axis_range=[0,2,-27,27], legend_loc=0):
+        """ plot dQ/dV for selected cells and selected cycles"""
+        
+        # import modules
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        from matplotlib import colors
+        
+        
+        # map cells input to cell_list
+        if cells=='all':
+            cell_list=[]
+            for sheet in self.sheetnames:
+                strings=sheet.split('_')
+                cell=strings[2]+'_'+strings[3]
+                cell_list.append(cell)
+                cell_list.append(cell)
+                cell_list=list(dict.fromkeys(cell_list))
+
+        if cells!='all':
+            cell_list=cells
+
+        # create list of sheet names corresponding to selected cells
+        sheets=[]
+        for cell in cell_list:
+            for sheet in self.cells_dict.keys():
+                if 'Detail_114_'+cell in sheet:
+                    sheets.append(sheet)
+
+        # create dictionary of selected cells with corresponding list of cycles with dfs
+        plot_dict={}
+        for sheet in sheets:
+            if cycles=='all':
+                cycles=pd.Series(self.cells_dict[sheet]['Cycle_Index'], index=None)   
+                cycles=cycles.drop_duplicates(keep='first').to_list()
+            if cycles!='all':
+                cycles=cycles
+            cycle_dict={}
+            for cycle in cycles:
+                sheet_df=self.cells_dict[sheet]
+                cycle_df=sheet_df.loc[sheet_df['Cycle']==cycle]
+                cycle_dict[cycle]=cycle_df
+            plot_dict[sheet]=cycle_dict
+            
+        # create plot of specifed cells and specified cycles
+        for sheet in plot_dict:
+            cycle_list=[]
+            for cycle in plot_dict[sheet].keys():
+                if len(plot_dict[sheet][cycle])!=0:
+                    cycle_list.append(cycle)
+            norm = colors.Normalize(min(cycle_list), max(cycle_list))
+            color_list=[]
+            for cycle in cycle_list:
+                color=plt.cm.rainbow_r(norm(cycle))
+                color_list.append(color)
+            color_map=dict(zip(cycle_list,color_list))
+            self.figure,ax=plt.subplots(figsize=(8,6))
+            for cycle in cycle_list:
+                lb='Cycle'+str(cycle)
+                df=plot_dict[sheet][cycle]
+                dsch_voltage=df.loc[(df['Status']=='CC_DChg')]['Voltage(V)']
+                dsch_dqdv=df.loc[(df['Status']=='CC_DChg')]['dQ/dV']
+                charge_voltage=df.loc[(df['Status']=='CC_Chg')]['Voltage(V)']
+                charge_dqdv=df.loc[(df['Status']=='CC_Chg')]['dQ/dV']
+                plt.plot(dsch_voltage, dsch_dqdv,
+                            label=lb, color=color_map[cycle], linewidth=2)
+                plt.plot(charge_voltage, charge_dqdv,
+                         color=color_map[cycle], linewidth=2)
+                legend=plt.legend(fontsize=16, frameon=True, ncol=3, 
+                           loc=legend_loc)
+                legend.get_frame().set_linewidth(2)
+                legend.get_frame().set_edgecolor('black')
+                plt.xlabel('Voltage (V)', fontsize=20, labelpad=10)
+                plt.ylabel('dQ/dV (Ah/V)',fontsize=20, labelpad=10)
+                plt.axis(axis_range)
+                plt.setp(ax.spines.values(), linewidth=2)
+                plt.tick_params(axis='both', direction='in', labelsize=18,
+                                length=8, width=2)
+            plt.show()
+        
 # %%
