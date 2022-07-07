@@ -399,5 +399,83 @@ class neware_file():
                 plt.setp(ax.spines.values(), linewidth=2)
                 plt.tick_params(axis='both', direction='in', labelsize=18,
                                 length=8, width=2)
-            plt.show()   
+            plt.show()
+            
+    # plot cycle life and coulombic efficiency
+    def plot_cycle_life(self, cells='all', plot_type='both', 
+                        y1_range=[0,50,400,550], y2_range=[0,50,90,105], 
+                        decimals=0):
+        """ plot cycle life and/or coulombic efficiency for selected cells"""
+        
+        # import modules
+        import matplotlib.pyplot as plt
+        from matplotlib import colors
+        from matplotlib.ticker import FormatStrFormatter
+        from matplotlib.text import OffsetFrom  
+        
+        # map cells input to cell_list
+        if cells=='all':
+            cell_list=[]
+            for sheet in self.sheetnames:
+                strings=sheet.split('_')
+                cell=strings[2]+'_'+strings[3]
+                cell_list.append(cell)
+                cell_list.append(cell)
+                cell_list=list(dict.fromkeys(cell_list))
+
+        if cells!='all':
+            cell_list=cells
+        
+        # map decimals input to variable
+        decimals='%.'+str(decimals)+'f'
+
+        # create list of sheet names corresponding to selected cells
+        sheets=[]
+        for cell in cell_list:
+            for sheet in self.cells_dict.keys():
+                if 'Cycle_114_'+cell in sheet:
+                    sheets.append(sheet)
+            sheets=list(dict.fromkeys(sheets))    
+        
+        # plot cycle life and/or coulombic efficiency for each cell selected
+        for sheet in sheets:
+            cycles=self.cells_dict[sheet]['ToTal of Cycle']
+            capacity=self.cells_dict[sheet]['Discharge_Capacity(mAh/g)']
+            coulomb_eff=self.cells_dict[sheet]['Coulombic_Efficiency(%)']
+            figure,ax1=plt.subplots(figsize=(8,6))
+
+            if plot_type=='capacity':
+                plt.plot(cycles, capacity, 
+                         color='red', marker='o', linewidth=0)
+                plt.ylabel('Capacity (mAh/g)',fontsize=20, labelpad=10)
+
+            if plot_type=='coulombic':
+                plt.plot(cycles, coulomb_eff, 
+                         color='red', marker='o', linewidth=0)
+                plt.ylabel('Coulombic Efficiency (%)',fontsize=20, labelpad=10)
+
+            if plot_type=='both':
+                ax1.plot(cycles, capacity, label='Capacity', 
+                         color='red', marker='o', linewidth=0)
+                ax1.set_ylabel('Capacity (mAh/g)', fontsize=20, labelpad=10, color='red')
+                ax2=ax1.twinx()
+                ax2.plot(cycles, coulomb_eff,
+                         label='Coulombic Efficiency', color='blue', 
+                         marker='o', linewidth=0)
+                ax2.set_ylabel('Coulombic Efficiency (%)', fontsize=20, labelpad=10, color='blue')
+                ax2.tick_params(axis='both', direction='in', labelsize=18,
+                            length=8, width=2)
+                ax2.ticklabel_format(useOffset=False) 
+                ax2.yaxis.set_major_formatter(FormatStrFormatter(decimals))
+                ax2.axis(y2_range)
+
+            ax1.set_xlabel('Cycle #', fontsize=20, labelpad=10)
+            plt.setp(ax1.spines.values(), linewidth=2)
+            ax1.tick_params(axis='both', direction='in', labelsize=18,
+                            length=8, width=2)
+            ax1.ticklabel_format(useOffset=False) 
+            ax1.yaxis.set_major_formatter(FormatStrFormatter(decimals))
+            ax1.axis(y1_range)
+
+            plt.show() 
 # %%
